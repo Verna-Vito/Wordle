@@ -1,0 +1,38 @@
+name: CI 1° Step - Gradle Jobs
+
+on:
+  workflow_call:
+  pull_request:
+    branches:
+      - main
+      - dev
+      - '**'  # 🔥 Questo attiva Gradle su qualsiasi PR
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    name: Gradle job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build project
+        run: ./gradlew build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build/libs/

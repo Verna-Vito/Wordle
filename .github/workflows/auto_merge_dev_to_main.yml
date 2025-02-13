@@ -1,0 +1,69 @@
+name: Auto Merge Dev to Main on Milestone Close
+
+on:
+  workflow_dispatch:
+  milestone:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  merge_dev_to_main:
+    name: Merge `dev` into `main`
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Git credentials
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git
+
+      - name: Fetch latest branches
+        run: |
+          git fetch origin main
+          git fetch origin dev
+
+      - name: Ensure branches exist
+        run: |
+          if ! git show-ref --verify --quiet refs/remotes/origin/dev; then
+            echo "Dev branch does not exist. Skipping merge."
+            exit 1
+          fi
+
+      - name: Merge `dev` into `main`
+        run: |
+          git checkout main
+          git pull origin main
+          git merge --no-ff origin/dev -m "🔄 Auto-merge dev into main after milestone closure"
+          git push origin main
+
+  sync_dev_with_main:
+    name: Sync dev with main
+    runs-on: ubuntu-latest
+    needs: merge_dev_to_main  # Aspetta il completamento del merge
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Set up Git authentication
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }}.git
+
+      - name: Fetch latest branches
+        run: |
+          git fetch origin main
+          git fetch origin dev
+
+      - name: Reset dev to main
+        run: |
+          git checkout dev
+          git reset --hard origin/main
+          git push --force origin dev

@@ -1,0 +1,41 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: 
+      - main
+      - dev
+      - "*" 
+  workflow_dispatch:
+  milestone:
+    types: [closed]  # 🔥 Trigger sulla chiusura delle milestone
+
+permissions:
+  contents: write
+  actions: read   
+  id-token: write 
+
+jobs:
+  PreSteps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Verify secrets
+        run: echo ${{ secrets.GH_USERNAME }} && echo ${{ secrets.GH_ACCESS_TOKEN }}
+
+  call-workflow1:
+    name: GRADLE TASKS
+    needs: PreSteps
+    uses: ./.github/workflows/gradle.yml
+
+  release:
+    name: RELEASE PACKAGE
+    needs: call-workflow1
+    if: github.event_name == 'milestone' && github.ref == 'refs/heads/main'  # ✅ Trigger solo su milestone chiusa e su main
+    uses: ./.github/workflows/release.yml
+    secrets:
+      PAT: ${{ secrets.PAT }}

@@ -1,0 +1,55 @@
+name: Close Issues on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - dev  # 🔥 Le PR chiuse su dev triggerano la chiusura delle issue
+
+permissions:
+  issues: write  # 🔥 Necessario per chiudere le issue
+  pull-requests: read  # Leggere PR per trovare le issue collegate
+  contents: read  # Accesso in lettura al repository
+
+jobs:
+  close-issues:
+    name: Close linked issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with PAT
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          token: ${{ secrets.PAT }}  # 🔥 Usa il PAT per autenticarsi
+
+      - name: Debug GitHub API Access
+        run: |
+          echo "🔍 Checking repository access..."
+          curl -H "Authorization: token ${{ secrets.PAT }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               "https://api.github.com/repos/${{ github.repository }}" | jq '.'
+
+      - name: Get linked issues from PR body
+        run: |
+          PR_BODY=$(gh pr view ${{ github.event.pull_request.number }} --json body -q '.body')
+          ISSUES=$(echo "$PR_BODY" | grep -oE "#[0-9]+" | tr -d "#" | tr '\n' ' ')
+
+          if [ -z "$ISSUES" ]; then
+            echo "⚠️ No linked issues found in PR body. Skipping."
+            exit 0
+          fi
+
+          echo "Linked issues found: $ISSUES"
+          echo "ISSUES=$ISSUES" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.PAT }}
+
+      - name: Close linked issues
+        run: |
+          for ISSUE in $ISSUES; do
+            echo "🔒 Closing issue #$ISSUE"
+            gh issue close $ISSUE --repo ${{ github.repository }} --reason completed
+          done
+        env:
+          GH_TOKEN: ${{ secrets.PAT }}
+
