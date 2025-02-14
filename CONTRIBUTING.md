@@ -63,6 +63,7 @@ Il feedback dovrebbe mostrare solo la "V" in verde e la "I" in giallo, ma attual
 ---
 
 ## 🔀 Creare una Pull Request (PR)
+La PR va collegata alla milestone ma non alla project board.
 
 Prima di aprire una PR, assicurati di:
 1. Aver creato un **branch separato** per il tuo lavoro.  
