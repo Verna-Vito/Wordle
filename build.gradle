@@ -14,6 +14,7 @@
 plugins {
     id "java"
     id "jacoco"
+    id "checkstyle"
     id "com.github.spotbugs" version "5.0.4"
     id "application"
     id "eclipse"
@@ -44,6 +45,14 @@ dependencies {
 /**************
 * PLUGINS SETUP
 ***************/                        
+
+/*
+*   Checkstyle
+*/
+checkstyle {
+	ignoreFailures = true
+	toolVersion "10.1"
+}
 
 /*
 *   Spotbugs
@@ -84,6 +93,14 @@ eclipse {
 /***********
 * TASK SETUP
 ************/
+
+checkstyleMain {
+    source = 'src/main/java'
+}
+
+checkstyleTest {
+    source ='src/test/java'
+}
 
 spotbugsMain {
     reports {
