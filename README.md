@@ -38,15 +38,16 @@ Se non è disponibile una release o se la release è danneggiata, puoi compilare
        ```
 2. Clonare la Repository
    ```
-    git clone https://github.com/user/repo.git
-    cd repo
+    git clone https://github.com/Verna-Vito/Wordle.git
+    cd Wordle
    ```
 3. Compilare ed Eseguire il Progetto
     Per buildare il progetto ed eseguire il gioco:
     ```
-    ./gradlew build   # Linux/macOS
-    gradlew.bat build # Windows
-    java -jar build/libs/wordle-java.jar
+    ./gradlew clean build   # Linux/macOS
+    gradlew.bat clean build # Windows
+
+    java -jar build/libs/wordle.jar
    ```
 
 ## 🛠 Tecnologie Utilizzate
