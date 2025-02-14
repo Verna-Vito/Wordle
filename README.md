@@ -56,5 +56,8 @@ Se non è disponibile una release o se la release è danneggiata, puoi compilare
 - JUnit 5 (per i test) ✅
 - Checkstyle (per la qualità del codice) 🔍
 
+## 🤝 Come Contribuire
+Vuoi contribuire al progetto? Consulta le [Linee Guida per i Contributori](CONTRIBUTING.md) prima di aprire una issue o una pull request.
+
 ## 📢 Contatti e Supporto
 Se hai problemi o suggerimenti, apri una issue con label **`question`** nella repository.
