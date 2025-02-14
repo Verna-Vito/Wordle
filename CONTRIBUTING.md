@@ -94,14 +94,44 @@ Closes #34
 - [x] I test unitari passano con successo.
 ```
 
-### ❗ Regole Generali
-- ✅ Scrivi codice pulito e documentato.
-- ✅ Ogni modifica deve essere discussa prima in un’Issue.
-- ✅ Se la PR è work in progress (WIP), usa il draft mode su GitHub.
-- ✅ Mantieni i commit chiari e leggibili, es.
-```
-git commit -m "Fix #34: migliorato il feedback visivo"
-```
-📌 Per ulteriori dettagli, consulta il nostro [README.md](README.md) per le istruzioni generali.
+## 🔀 Flusso di Lavoro Git
+
+Per mantenere un repository ordinato e un flusso di sviluppo chiaro, segui queste regole quando lavori con i branch e le PR.
+
+### 📌 Regole sui Branch
+- **Ogni issue deve avere un branch dedicato** con il nome `issue#<numero>` (es. `issue#21`).
+- **Le PR devono essere aperte da `issue#<numero>` a `dev`**.
+- **Dopo il merge in `dev`, il branch `issue#<numero>` deve essere eliminato**.
+- **Il branch `dev` non deve mai essere cancellato**.
+- **Non devono essere aperte PR da `dev` a `main`**, perché il rilascio su `main` avviene automaticamente quando viene chiusa una milestone.
+
+### 🔧 Procedura per aprire una PR
+1. Crea un nuovo branch dal branch `dev`:
+   ```
+   git checkout dev
+   git pull origin dev
+   git checkout -b issue#<numero>
+   ```
+2. Implementa le modifiche e fai i commit con un messaggio chiaro:
+    ```
+    git commit -m "Fix #<numero>: Breve descrizione della modifica"
+    ```
+3. Pusha il branch remoto:
+    ```
+    git push origin issue#<numero>
+    ```
+4. Apri una PR da issue#<numero> a dev e segui le Linee Guida per le PR. Una volta che la PR è mergiata, elimina il branch locale e remoto:
+    ```
+    git branch -d issue#<numero>
+    git push origin --delete issue#<numero>
+    ```
+
+### 🚀 Pipeline di Rilascio
+Il branch main rappresenta solo le versioni rilasciate.
+La pipeline di rilascio viene avviata automaticamente alla chiusura della milestone.
+Non devono essere aperte PR manuali da dev a main.
+
+---
+📌 Per ulteriori dettagli, consulta il [README.md](README.md) per le istruzioni generali.
 
 Grazie per il tuo contributo! 🚀
