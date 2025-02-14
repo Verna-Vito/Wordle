@@ -173,6 +173,9 @@ task fatJar(type: Jar) {
 }
 project.tasks.getByName('build').dependsOn fatJar
 
+// Assicura che Checkstyle venga eseguito prima della build
+check.dependsOn checkstyleMain
+build.dependsOn check
 
 /***********************
 * MAIN CLASS DECLARATION
