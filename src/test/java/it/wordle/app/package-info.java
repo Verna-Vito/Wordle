@@ -1,4 +1,4 @@
 /**
  * Main test package of the application.
  */
-package it.uniba.app;
+package it.wordle.app;

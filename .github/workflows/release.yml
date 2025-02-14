@@ -108,8 +108,8 @@ jobs:
             label="${LABELS[$i]}"
 
             issues=$(gh issue list --state closed --milestone "${{ env.MILESTONE_TITLE }}" --json title,number,labels --jq '
-              .[] | select(.labels | any(.name == "'"$label"'")) | 
-              "- \"" + .title + "\" (#" + (.number | tostring) + ")"')
+                .[] | select(.labels | any(.name == "'"$label"'")) | 
+                "- \"" + .title + "\" (#" + (.number | tostring) + ") [" + (.labels | map(.name) | join(", ")) + "]"')
 
             if [ ! -z "$issues" ]; then
               echo "#### $category" >> release_body.md

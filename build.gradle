@@ -148,7 +148,7 @@ tasks.getByName('spotbugsTest').finalizedBy('spotbugsTestReport')
 // Generate the executable Jar (to be included in the Docker container)
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'it.uniba.app/App'
+        attributes 'Main-Class': 'it.wordle.app/App'
     }
     archiveBaseName = project.name //+ '-all'
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -161,4 +161,4 @@ project.tasks.getByName('build').dependsOn fatJar
 * MAIN CLASS DECLARATION
 ************************/
 
-mainClassName = 'it.uniba.app/App'
+mainClassName = 'it.wordle.app/App'
