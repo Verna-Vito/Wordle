@@ -14,6 +14,7 @@
 plugins {
     id "java"
     id "jacoco"
+    id "checkstyle"
     id "com.github.spotbugs" version "5.0.4"
     id "application"
     id "eclipse"
@@ -44,6 +45,14 @@ dependencies {
 /**************
 * PLUGINS SETUP
 ***************/                        
+
+/*
+*   Checkstyle
+*/
+checkstyle {
+	ignoreFailures = true
+	toolVersion "10.1"
+}
 
 /*
 *   Spotbugs
@@ -84,6 +93,14 @@ eclipse {
 /***********
 * TASK SETUP
 ************/
+
+checkstyleMain {
+    source = 'src/main/java'
+}
+
+checkstyleTest {
+    source ='src/test/java'
+}
 
 spotbugsMain {
     reports {
@@ -148,7 +165,7 @@ tasks.getByName('spotbugsTest').finalizedBy('spotbugsTestReport')
 // Generate the executable Jar (to be included in the Docker container)
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Main-Class': 'it.uniba.app/App'
+        attributes 'Main-Class': 'it.wordle.app/App'
     }
     archiveBaseName = project.name //+ '-all'
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
@@ -156,9 +173,12 @@ task fatJar(type: Jar) {
 }
 project.tasks.getByName('build').dependsOn fatJar
 
+// Assicura che Checkstyle venga eseguito prima della build
+check.dependsOn checkstyleMain
+build.dependsOn check
 
 /***********************
 * MAIN CLASS DECLARATION
 ************************/
 
-mainClassName = 'it.uniba.app/App'
+mainClassName = 'it.wordle.app/App'

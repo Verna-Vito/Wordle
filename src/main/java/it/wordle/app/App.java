@@ -1,4 +1,4 @@
-package it.uniba.app;
+package it.wordle.app;
 
 public final class App {
 
@@ -8,6 +8,6 @@ public final class App {
      * @param args - argomenti da linea di comando
      */
     public static void main(final String[] args) {
-        System.out.println("Hello my brother!");
+        System.out.println("Hello World!");
     }
 }
