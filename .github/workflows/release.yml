@@ -51,18 +51,11 @@ jobs:
       - name: Get last closed milestone (with fallback)
         id: milestone
         run: |
-          echo "Trying to fetch the last closed milestone..."
-          # Primo tentativo con gh API
-          milestone_data=$(gh api repos/${{ github.repository }}/milestones --jq \
-            '.[] | select(.state=="closed" and .closed_at != null) | {title, closed_at} | sort_by(.closed_at) | last')
-          # Se milestone_data è vuoto, prova con curl
-          if [ -z "$milestone_data" ]; then
-            echo "⚠️ No closed milestone found with gh CLI, trying curl..."
-            milestone_data=$(curl -s -H "Authorization: token ${{ secrets.PAT }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/milestones?state=closed" | \
-              jq '. | sort_by(.closed_at) | last | {title, closed_at}')
-          fi
+          milestone_data=$(curl -s -H "Authorization: token ${{ secrets.PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/milestones?state=closed" | \
+            jq '. | sort_by(.closed_at) | last | {title, closed_at}')
+
           # Estrai il titolo della milestone
           milestone_title=$(echo "$milestone_data" | jq -r '.title')
           if [ -z "$milestone_title" ] || [ "$milestone_title" == "null" ]; then
@@ -76,8 +69,12 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT }}
 
       - name: Generate version number
-        run: echo "VERSION=v1.0.0.${{ github.run_number }}" >> $GITHUB_ENV
-
+        run: |
+          VERSION="v${{ vars.MAJOR_VERSION }}.${{ vars.MINOR_VERSION }}.${{ vars.HOTFIX_VERSION }} ${{ github.run_number }}"
+          # Sostituire gli spazi con trattini
+          VERSION="${VERSION// /-}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      
       - name: Debug - List Issues and PRs without Milestone
         run: |
           echo "🔍 Checking closed issues without milestone..."
@@ -92,7 +89,7 @@ jobs:
 
       - name: Generate Changelog with Categorized Issues and PRs
         run: |
-          echo "# 🚀 Release: ${{ env.MILESTONE_TITLE }}" > release_body.md
+          echo "# 🚀 Release: ${{ env.MILESTONE_TITLE }} ${{ env.VERSION }}" > release_body.md
           echo "" >> release_body.md
           echo "## 📜 Changelog" >> release_body.md
           echo "" >> release_body.md
@@ -123,6 +120,11 @@ jobs:
 
       - name: Create and push Git tag
         run: |
+          VERSION="${{ env.VERSION }}"
+          VERSION=$(echo "$VERSION" | sed 's/(/\(/g; s/)/\)/g')
+
+          echo "$VERSION"
+          
           git fetch --tags --force
           git checkout main
           git pull origin main --rebase
@@ -130,8 +132,8 @@ jobs:
           if git rev-parse "refs/tags/$VERSION" >/dev/null 2>&1; then
             echo "🚫 Tag $VERSION already exists. Skipping creation."
           else
-            git tag $VERSION
-            git push origin $VERSION
+            git tag "$VERSION"
+            git push origin "$VERSION"
           fi
 
       - name: Create GitHub Release
@@ -143,6 +145,27 @@ jobs:
           draft: false
           prerelease: false
           token: ${{ secrets.PAT }}
+
+      - name: Rename the JAR file with version
+        run: |
+          # Trova il primo file .jar nella cartella build/libs
+          JAR_FILE=$(find build/libs/ -type f -name "*.jar" | head -n 1)
+
+          # Se non viene trovato alcun file JAR, esci con un errore
+          if [ -z "$JAR_FILE" ]; then
+            echo "❌ No JAR file found. Exiting..."
+            exit 1
+          fi
+
+          # Ottieni la versione dal contesto delle variabili di ambiente
+          VERSION="v${{ vars.MAJOR_VERSION }}.${{ vars.MINOR_VERSION }}.${{ vars.HOTFIX_VERSION }}_${{ env.MILESTONE_TITLE }}"
+
+          # Crea il nuovo nome del JAR usando il nome del repository e la versione
+          NEW_JAR_NAME="$(basename ${{ github.repository }})-${VERSION}.jar"
+    
+          # Rinomina il file JAR
+          mv "$JAR_FILE" "build/libs/$NEW_JAR_NAME"
+          echo "Renamed JAR: build/libs/$NEW_JAR_NAME"
 
       - name: Upload artifacts to release
         uses: softprops/action-gh-release@v1
