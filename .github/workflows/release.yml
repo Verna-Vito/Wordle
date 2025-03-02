@@ -167,9 +167,15 @@ jobs:
           mv "$JAR_FILE" "build/libs/$NEW_JAR_NAME"
           echo "Renamed JAR: build/libs/$NEW_JAR_NAME"
 
+          # Salva i nuovi nomi come variabili d'ambiente
+          echo "NEW_CLI_JAR_NAME=$NEW_CLI_JAR_NAME" >> $GITHUB_ENV
+          echo "NEW_GUI_JAR_NAME=$NEW_GUI_JAR_NAME" >> $GITHUB_ENV
+
       - name: Upload artifacts to release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION }}
-          files: build/libs/*
+          files: |
+            build/libs/${{ env.NEW_CLI_JAR_NAME }}
+            build/libs/${{ env.NEW_GUI_JAR_NAME }}
           token: ${{ secrets.PAT }}
