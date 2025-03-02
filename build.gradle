@@ -163,22 +163,34 @@ task spotbugsTestReport {
 tasks.getByName('spotbugsTest').finalizedBy('spotbugsTestReport')
 
 // Generate the executable Jar (to be included in the Docker container)
-task fatJar(type: Jar) {
+// CLI Jar
+task buildCliJar(type: Jar) {
+    archiveBaseName.set('wordle-cli')
+    from sourceSets.main.output
     manifest {
-        attributes 'Main-Class': 'it.wordle.app/App'
+        attributes(
+            'Main-Class': 'it.wordle.cliapp/App'
+        )
     }
-    archiveBaseName = project.name //+ '-all'
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-project.tasks.getByName('build').dependsOn fatJar
+    destinationDirectory.set(file("$buildDir/libs/cli"))
+    dependsOn test 
 
-// Assicura che Checkstyle venga eseguito prima della build
+}
+
+
+// GUI Jar
+task buildGuiJar(type: Jar) {
+    archiveBaseName.set('wordle-gui')
+    from sourceSets.main.output
+    manifest {
+        attributes(
+            'Main-Class': 'it.wordle.guiapp/App'
+        )
+    }
+    destinationDirectory.set(file("$buildDir/libs/gui"))
+    dependsOn test
+}
+
+project.tasks.getByName('build').dependsOn test, buildCliJar, buildGuiJar
 check.dependsOn checkstyleMain
 build.dependsOn check
-
-/***********************
-* MAIN CLASS DECLARATION
-************************/
-
-mainClassName = 'it.wordle.app/App'
