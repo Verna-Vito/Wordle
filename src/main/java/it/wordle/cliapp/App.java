@@ -1,4 +1,6 @@
-package it.wordle.app;
+package it.wordle.cliapp;
+
+import it.wordle.core.Core;
 
 public final class App {
 
@@ -8,6 +10,6 @@ public final class App {
      * @param args - argomenti da linea di comando
      */
     public static void main(final String[] args) {
-        System.out.println("Hello World!");
+        System.out.println(Core.GREETING);
     }
 }
