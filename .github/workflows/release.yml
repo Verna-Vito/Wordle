@@ -149,8 +149,8 @@ jobs:
       - name: Rename the JAR files with version
         run: |
           # Trova i file .jar nella cartella build/libs per CLI e GUI
-          CLI_JAR=$(find build/libs/ -type f -name "build-cli*.jar" | head -n 1)
-          GUI_JAR=$(find build/libs/ -type f -name "build-gui*.jar" | head -n 1)
+          CLI_JAR=$(find build/libs/ -type f -name "wordle-cli*.jar" | head -n 1)
+          GUI_JAR=$(find build/libs/ -type f -name "wordle-gui*.jar" | head -n 1)
 
           # Se non vengono trovati i file JAR, esci con un errore
           if [ -z "$CLI_JAR" ] || [ -z "$GUI_JAR" ]; then
