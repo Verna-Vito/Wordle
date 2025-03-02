@@ -146,26 +146,31 @@ jobs:
           prerelease: false
           token: ${{ secrets.PAT }}
 
-      - name: Rename the JAR file with version
+      - name: Rename the JAR files with version
         run: |
-          # Trova il primo file .jar nella cartella build/libs
-          JAR_FILE=$(find build/libs/ -type f -name "*.jar" | head -n 1)
+          # Trova i file .jar nella cartella build/libs per CLI e GUI
+          CLI_JAR=$(find build/libs/ -type f -name "wordle-cli*.jar" | head -n 1)
+          GUI_JAR=$(find build/libs/ -type f -name "wordle-gui*.jar" | head -n 1)
 
-          # Se non viene trovato alcun file JAR, esci con un errore
-          if [ -z "$JAR_FILE" ]; then
-            echo "❌ No JAR file found. Exiting..."
+          # Se non vengono trovati i file JAR, esci con un errore
+          if [ -z "$CLI_JAR" ] || [ -z "$GUI_JAR" ]; then
+            echo "❌ One or both JAR files (CLI/GUI) not found. Exiting..."
             exit 1
           fi
 
           # Ottieni la versione dal contesto delle variabili di ambiente
           VERSION="v${{ vars.MAJOR_VERSION }}.${{ vars.MINOR_VERSION }}.${{ vars.HOTFIX_VERSION }}_${{ env.MILESTONE_TITLE }}"
 
-          # Crea il nuovo nome del JAR usando il nome del repository e la versione
-          NEW_JAR_NAME="$(basename ${{ github.repository }})-${VERSION}.jar"
-    
-          # Rinomina il file JAR
-          mv "$JAR_FILE" "build/libs/$NEW_JAR_NAME"
-          echo "Renamed JAR: build/libs/$NEW_JAR_NAME"
+          # Crea i nuovi nomi per i JAR usando il nome del repository e la versione
+          NEW_CLI_JAR_NAME="$(basename ${{ github.repository }})-${VERSION}-cli.jar"
+          NEW_GUI_JAR_NAME="$(basename ${{ github.repository }})-${VERSION}-gui.jar"
+          
+          # Rinomina i file JAR per CLI e GUI
+          mv "$CLI_JAR" "build/libs/$NEW_CLI_JAR_NAME"
+          mv "$GUI_JAR" "build/libs/$NEW_GUI_JAR_NAME"
+          
+          # Conferma i nuovi nomi dei JAR
+          echo "Renamed JARs: build/libs/$NEW_CLI_JAR_NAME and build/libs/$NEW_GUI_JAR_NAME"
 
           # Salva i nuovi nomi come variabili d'ambiente
           echo "NEW_CLI_JAR_NAME=$NEW_CLI_JAR_NAME" >> $GITHUB_ENV
